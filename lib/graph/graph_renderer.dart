@@ -290,14 +290,23 @@ class RenderGraphWidget extends RenderBox
         final secondNodeOffset = Offset(secondData.left + offset.dx,
             secondData.top + 0.5 * secondData.height + offset.dy);
         linePath.moveTo(firstNodeOffset.dx, firstNodeOffset.dy);
-        linePath.cubicTo(
-          firstNodeOffset.dx,
-          firstNodeOffset.dy,
-          firstNodeOffset.dx + 15,
-          firstNodeOffset.dy + 75,
-          secondNodeOffset.dx,
-          secondNodeOffset.dy,
-        );
+
+        if (firstNodeOffset.dy == secondNodeOffset.dy) {
+          linePath.lineTo(
+            secondNodeOffset.dx,
+            secondNodeOffset.dy,
+          );
+        } else {
+          linePath.cubicTo(
+            firstNodeOffset.dx,
+            firstNodeOffset.dy,
+            firstNodeOffset.dx + 15,
+            firstNodeOffset.dy + 75,
+            secondNodeOffset.dx,
+            secondNodeOffset.dy,
+          );
+        }
+
         if (withArrow) {
           linePath = ArrowPath.make(path: linePath);
         }
