@@ -35,12 +35,14 @@ class NodeWidget extends StatelessWidget {
       this.builder,
       this.child,
       this.backgroundColor,
-      required this.index})
+      required this.index,
+      this.isRoot = false})
       : assert(builder != null || child != null),
         super(key: key);
   final Widget? child;
   final Builder? builder;
   final Color? backgroundColor;
+  final bool isRoot;
   final int index;
 
   @override

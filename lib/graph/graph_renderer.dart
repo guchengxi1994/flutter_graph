@@ -113,6 +113,7 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
                           ]),
                           children: nodesIds
                               .map((e) => NodeWidget(
+                                    isRoot: e == 0,
                                     index: e,
                                     child: Container(
                                       padding: const EdgeInsets.all(5),
@@ -149,18 +150,19 @@ class RenderGraphWidget extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, GraphParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, GraphParentData> {
-  RenderGraphWidget({
-    required this.ctx,
-    required this.relations,
-    List<RenderBox>? children,
-    this.withArrow = true,
-  }) {
+  RenderGraphWidget(
+      {required this.ctx,
+      required this.relations,
+      List<RenderBox>? children,
+      this.withArrow = true,
+      required this.nodes}) {
     addAll(children);
   }
 
   bool withArrow;
   BuildContext ctx;
   NodeRelations relations;
+  final List<NodeWidget> nodes;
 
   set currentRelation(Tuple2<int, int> c) {
     if (_currentRelation != c) {
@@ -193,9 +195,14 @@ class RenderGraphWidget extends RenderBox
       return;
     }
 
-    ///初始化区域
+    /// 初始化区域
     var recordRect = Rect.zero;
     var previousChildRect = Rect.zero;
+
+    /// 这里记录的是保存的位置
+    ///
+    /// 如果已经有了组件,就向下继续
+    List<Offset> _positions = [];
 
     RenderBox? child = firstChild;
     var curIndex = 0;
@@ -203,8 +210,6 @@ class RenderGraphWidget extends RenderBox
       ///提出数据
       final GraphParentData childParentData =
           child.parentData as GraphParentData;
-
-      // child.layout(constraints, parentUsesSize: true);
 
       child.layout(
           const BoxConstraints(
@@ -216,9 +221,28 @@ class RenderGraphWidget extends RenderBox
       ///记录大小
       childParentData.width = childSize.width;
       childParentData.height = childSize.height;
-      final position = Offset(
-          childSize.width + curIndex * nodeHorizontalDistance,
-          childSize.height + curIndex * nodeVerticalDistance);
+
+      late Offset position;
+
+      if (curIndex >= 1) {
+        int _positionIndex = 0;
+        while (1 == 1) {
+          position = Offset(1 * nodeHorizontalDistance,
+              childSize.height + _positionIndex * nodeVerticalDistance);
+
+          if (!_positions.contains(position)) {
+            _positions.add(position);
+            // print(position);
+            break;
+          } else {
+            _positionIndex++;
+          }
+        }
+      } else {
+        /// 第一个node
+        position = Offset(childSize.width, childSize.height);
+      }
+
       childParentData.offset = position;
       previousChildRect = childParentData.content;
       recordRect = recordRect.expandToInclude(previousChildRect);
@@ -317,7 +341,10 @@ class GraphWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderGraphWidget(ctx: context, relations: relations);
+    return RenderGraphWidget(
+        ctx: context,
+        relations: relations,
+        nodes: children as List<NodeWidget>);
   }
 
   @override
