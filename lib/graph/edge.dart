@@ -1,25 +1,22 @@
-import 'package:flow_graph/graph/node.dart';
 import 'package:flutter/material.dart';
 
 class Edge {
-  Path path;
-  NodeWidget firstNode;
-  NodeWidget secondNode;
-  bool isSelected;
+  int firstNodeIndex;
+  int secondNodeIndex;
+  Path? path;
+
   Edge(
-      {required this.firstNode,
-      required this.secondNode,
-      required this.path,
-      this.isSelected = false});
+      {required this.firstNodeIndex, required this.secondNodeIndex, this.path});
 
   @override
   bool operator ==(Object other) {
     if (other is! Edge) {
       return false;
     }
-    return path == other.path && isSelected == other.isSelected;
+    return firstNodeIndex == other.firstNodeIndex &&
+        secondNodeIndex == other.secondNodeIndex;
   }
 
   @override
-  int get hashCode => path.hashCode;
+  int get hashCode => firstNodeIndex.hashCode + secondNodeIndex.hashCode;
 }

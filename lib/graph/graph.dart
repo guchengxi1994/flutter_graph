@@ -1,26 +1,12 @@
 // ignore_for_file: avoid_init_to_null
 
-import 'package:flow_graph/graph/edge.dart';
-import 'package:flow_graph/graph/node.dart';
+import 'package:tuple/tuple.dart';
 
-class Graph {
-  List<NodeWidget> children;
-  List<Edge> edges = [];
-  Graph({required this.children});
+class NodeRelations {
+  List<Tuple2<int, int>> relations;
+  NodeRelations({required this.relations});
 
-  int? selectedFirstNodeIndex = null;
-  int? selectedSecondNodeIndex = null;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! Graph) {
-      return false;
-    }
-    return selectedFirstNodeIndex == other.selectedFirstNodeIndex &&
-        selectedSecondNodeIndex == other.selectedSecondNodeIndex;
+  Tuple2<int, int> getByIndex(int i) {
+    return relations[i];
   }
-
-  @override
-  int get hashCode =>
-      selectedFirstNodeIndex.hashCode + selectedSecondNodeIndex.hashCode;
 }

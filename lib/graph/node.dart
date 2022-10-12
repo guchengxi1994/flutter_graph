@@ -44,6 +44,14 @@ class NodeWidget extends StatelessWidget {
   final int index;
 
   @override
+  bool operator ==(Object other) {
+    if (other is! NodeWidget) {
+      return false;
+    }
+    return other.index == index;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Material(
       color: backgroundColor ?? Theme.of(context).primaryColor,

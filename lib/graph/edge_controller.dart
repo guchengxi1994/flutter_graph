@@ -1,9 +1,10 @@
+import 'package:flow_graph/graph/edge.dart';
 import 'package:flutter/material.dart';
 
 class EdgeController extends ChangeNotifier {
-  List<Path> edges = [];
+  List<Edge> edges = [];
 
-  addEdge(Path p) {
-    edges.add(p);
+  addEdge(Edge e) {
+    edges.add(e);
   }
 }
