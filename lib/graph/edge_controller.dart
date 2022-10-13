@@ -1,4 +1,4 @@
-import 'package:flow_graph/graph/edge.dart';
+import 'package:flutter_graph/graph/edge.dart';
 import 'package:flutter/material.dart';
 
 class EdgeController extends ChangeNotifier {

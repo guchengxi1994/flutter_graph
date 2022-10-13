@@ -64,18 +64,18 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.3.0"
-  flow_graph:
+  flutter:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  flutter_graph:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
     version: "1.0.0+1"
-  flutter:
-    dependency: "direct main"
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:

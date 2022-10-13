@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flow_graph/graph/graph_renderer.dart';
+import 'package:flutter_graph/graph/graph_renderer.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: const CustomMultiRenderDemoPage(),
-      home: GraphDemoPage(),
+      home: const GraphDemoPage(),
     );
   }
 }

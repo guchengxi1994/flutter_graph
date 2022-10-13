@@ -1,9 +1,10 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'package:arrow_path/arrow_path.dart';
-import 'package:flow_graph/graph/edge_controller.dart';
+import 'package:flutter_graph/graph/edge_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_graph/graph/node_data.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -24,6 +25,42 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
   final ScrollController controller2 = ScrollController();
   Tuple2<int, int> currentRelation = const Tuple2(-1, -1);
 
+  NodeData data = NodeData();
+
+  @override
+  void initState() {
+    super.initState();
+    data.index = 0;
+    data.isRoot = true;
+    data.children = [];
+
+    NodeData data1 = NodeData();
+    data1.index = 1;
+    data1.isRoot = false;
+    data1.children = [];
+
+    NodeData data2 = NodeData();
+    data2.index = 2;
+    data2.isRoot = false;
+    data2.children = [];
+
+    data.children!.add(data1);
+    data.children!.add(data2);
+
+    NodeData data3 = NodeData();
+    data3.index = 3;
+    data3.isRoot = false;
+    data3.children = [];
+
+    NodeData data4 = NodeData();
+    data4.index = 4;
+    data4.isRoot = false;
+    data4.children = [];
+
+    data1.children!.add(data3);
+    data3.children!.add(data4);
+  }
+
   @override
   void dispose() {
     controller1.dispose();
@@ -33,9 +70,12 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final relations = NodeData.fromJson(data.toJson()).toRelations();
+
     return ChangeNotifierProvider(
       create: (_) => EdgeController(),
       builder: (context, child) {
+        final edges = context.read<EdgeController>().edges;
         return Scaffold(
           persistentFooterButtons: <Widget>[
             TextButton(
@@ -69,9 +109,6 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
           ],
           body: GestureDetector(
             onTapDown: (details) {
-              // debugPrint(details.localPosition.toString());
-              final edges = context.read<EdgeController>().edges;
-              // print(edges.length);
               for (int i = 0; i < edges.length; i++) {
                 if (edges[i].path == null) {
                   continue;
@@ -105,12 +142,9 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
                     child: SingleChildScrollView(
                       controller: controller2,
                       child: GraphWidget(
+                          rootData: data,
                           currentRelation: currentRelation,
-                          relations: NodeRelations(relations: [
-                            const Tuple2(0, 1),
-                            const Tuple2(0, 2),
-                            const Tuple2(0, 3),
-                          ]),
+                          relations: relations,
                           children: nodesIds
                               .map((e) => NodeWidget(
                                     isRoot: e == 0,
@@ -155,7 +189,8 @@ class RenderGraphWidget extends RenderBox
       required this.relations,
       List<RenderBox>? children,
       this.withArrow = true,
-      required this.nodes}) {
+      required this.nodes,
+      required this.rootData}) {
     addAll(children);
   }
 
@@ -163,6 +198,7 @@ class RenderGraphWidget extends RenderBox
   BuildContext ctx;
   NodeRelations relations;
   final List<NodeWidget> nodes;
+  final NodeData rootData;
 
   set currentRelation(Tuple2<int, int> c) {
     if (_currentRelation != c) {
@@ -179,6 +215,7 @@ class RenderGraphWidget extends RenderBox
 
   final double nodeHorizontalDistance = 150;
   final double nodeVerticalDistance = 100;
+  final double triangleArrowHeight = 8.0;
 
   ///设置为我们的数据
   @override
@@ -279,7 +316,7 @@ class RenderGraphWidget extends RenderBox
         Paint paint = Paint()
           ..color = currentRelation == relation ? Colors.black : Colors.red
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
+          ..strokeWidth = 3.0;
         var linePath = Path();
 
         linePath.reset();
@@ -289,22 +326,32 @@ class RenderGraphWidget extends RenderBox
 
         final secondNodeOffset = Offset(secondData.left + offset.dx,
             secondData.top + 0.5 * secondData.height + offset.dy);
-        linePath.moveTo(firstNodeOffset.dx, firstNodeOffset.dy);
+
+        var start = Offset((firstData.left + firstData.right) / 2 + offset.dx,
+            (firstData.bottom - 20 + offset.dy));
+
+        var end = Offset((secondData.left + secondData.right) / 2 + offset.dx,
+            (secondData.bottom - 20 + offset.dy));
 
         if (firstNodeOffset.dy == secondNodeOffset.dy) {
-          linePath.lineTo(
+          linePath.moveTo(firstNodeOffset.dx, firstNodeOffset.dy);
+          linePath.cubicTo(
+            firstNodeOffset.dx,
+            firstNodeOffset.dy,
+            firstNodeOffset.dx + 10,
+            firstNodeOffset.dy + 10,
             secondNodeOffset.dx,
             secondNodeOffset.dy,
           );
         } else {
+          linePath.moveTo(start.dx, start.dy);
           linePath.cubicTo(
-            firstNodeOffset.dx,
-            firstNodeOffset.dy,
-            firstNodeOffset.dx + 15,
-            firstNodeOffset.dy + 75,
-            secondNodeOffset.dx,
-            secondNodeOffset.dy,
-          );
+              start.dx,
+              start.dy + nodeVerticalDistance / 2,
+              end.dx,
+              end.dy - nodeVerticalDistance / 2,
+              end.dx,
+              end.dy - triangleArrowHeight);
         }
 
         if (withArrow) {
@@ -342,18 +389,21 @@ class GraphWidget extends MultiChildRenderObjectWidget {
       {Key? key,
       List<Widget> children = const <Widget>[],
       required this.relations,
-      required this.currentRelation})
+      required this.currentRelation,
+      required this.rootData})
       : super(children: children, key: key);
 
   Tuple2<int, int> currentRelation;
   NodeRelations relations;
+  NodeData rootData;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderGraphWidget(
         ctx: context,
         relations: relations,
-        nodes: children as List<NodeWidget>);
+        nodes: children as List<NodeWidget>,
+        rootData: rootData);
   }
 
   @override

@@ -1,5 +1,5 @@
-import 'package:flow_graph/graph/line.dart';
-import 'package:flow_graph/graph/node.dart';
+import 'package:flutter_graph/graph/line.dart';
+import 'package:flutter_graph/graph/node.dart';
 import 'package:flutter/material.dart';
 
 class MyNodesDemo1 extends StatefulWidget {
