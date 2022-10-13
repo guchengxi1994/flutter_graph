@@ -62,4 +62,6 @@ class NodeData {
 
     return list;
   }
+
+  int? get depth => _depth;
 }

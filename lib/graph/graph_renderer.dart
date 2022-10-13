@@ -232,6 +232,8 @@ class RenderGraphWidget extends RenderBox
       return;
     }
 
+    List<NodeData> nodeDatas = rootData.toList();
+
     /// 初始化区域
     var recordRect = Rect.zero;
     var previousChildRect = Rect.zero;
@@ -247,6 +249,11 @@ class RenderGraphWidget extends RenderBox
       ///提出数据
       final GraphParentData childParentData =
           child.parentData as GraphParentData;
+
+      final depth = nodeDatas
+          .firstWhere((element) => element.index == curIndex,
+              orElse: () => NodeData(index: -1))
+          .depth;
 
       child.layout(
           const BoxConstraints(
@@ -264,7 +271,7 @@ class RenderGraphWidget extends RenderBox
       if (curIndex >= 1) {
         int _positionIndex = 0;
         while (1 == 1) {
-          position = Offset(1 * nodeHorizontalDistance,
+          position = Offset((depth ?? 1) * nodeHorizontalDistance,
               childSize.height + _positionIndex * nodeVerticalDistance);
 
           if (!_positions.contains(position)) {
