@@ -5,6 +5,6 @@ class EdgeController extends ChangeNotifier {
   List<Edge> edges = [];
 
   addEdge(Edge e) {
-    edges.add(e);
+    if (!edges.contains(e)) edges.add(e);
   }
 }

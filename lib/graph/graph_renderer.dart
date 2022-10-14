@@ -61,6 +61,14 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
 
     data1.children!.add(data3);
     data3.children!.add(data4);
+
+    data.children!.add(NodeData(index: 5, children: []));
+    data.children!.add(NodeData(index: 6, children: []));
+    data.children!.add(NodeData(index: 7, children: []));
+    data.children!.add(NodeData(index: 8, children: []));
+    data.children!.add(NodeData(index: 9, children: []));
+    data.children!.add(NodeData(index: 10, children: []));
+    data.children!.add(NodeData(index: 11, children: []));
   }
 
   @override
@@ -125,7 +133,19 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
                   if (edges[i].path == null) {
                     continue;
                   }
-                  if (edges[i].path!.contains(details.localPosition)) {
+                  final c = edges[i].path!.contains(details.localPosition) ||
+                      edges[i].path!.contains(Offset(details.localPosition.dx,
+                          details.localPosition.dy - 1)) ||
+                      edges[i].path!.contains(Offset(details.localPosition.dx,
+                          details.localPosition.dy + 1)) ||
+                      edges[i].path!.contains(Offset(
+                          details.localPosition.dx - 1,
+                          details.localPosition.dy)) ||
+                      edges[i].path!.contains(Offset(
+                          details.localPosition.dx + 1,
+                          details.localPosition.dy));
+
+                  if (c) {
                     setState(() {
                       // currentIndex = i;
                       currentRelation = Tuple2(
@@ -325,6 +345,8 @@ class RenderGraphWidget extends RenderBox
     canvas.save();
 
     final children = getChildrenAsList();
+
+    // print(relations.relations.length);
 
     for (int i = 0; i < relations.relations.length; i++) {
       Tuple2<int, int> relation = relations.getByIndex(i);
