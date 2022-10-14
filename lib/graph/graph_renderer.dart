@@ -1,6 +1,7 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'package:arrow_path/arrow_path.dart';
+import 'package:blurred/blurred.dart';
 import 'package:flutter_graph/graph/edge_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_graph/graph/node_data.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'blur_controller.dart';
 import 'edge.dart';
 import 'graph.dart';
 import 'node.dart';
@@ -72,10 +74,18 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
   Widget build(BuildContext context) {
     final relations = NodeData.fromJson(data.toJson()).toRelations();
 
-    return ChangeNotifierProvider(
-      create: (_) => EdgeController(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => EdgeController(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => BlurController(),
+        ),
+      ],
       builder: (context, child) {
         final edges = context.read<EdgeController>().edges;
+        BlurController blurController = context.watch<BlurController>();
         return Scaffold(
           persistentFooterButtons: <Widget>[
             TextButton(
@@ -107,60 +117,64 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
               ),
             ),
           ],
-          body: GestureDetector(
-            onTapDown: (details) {
-              for (int i = 0; i < edges.length; i++) {
-                if (edges[i].path == null) {
-                  continue;
-                }
-                if (edges[i].path!.contains(details.localPosition)) {
-                  setState(() {
-                    // currentIndex = i;
-                    currentRelation = Tuple2(
-                        edges[i].firstNodeIndex, edges[i].secondNodeIndex);
-                  });
+          body: Blurred(
+            blurValue: blurController.shouldBlur ? 1.5 : 0,
+            widget: GestureDetector(
+              onTapDown: (details) {
+                for (int i = 0; i < edges.length; i++) {
+                  if (edges[i].path == null) {
+                    continue;
+                  }
+                  if (edges[i].path!.contains(details.localPosition)) {
+                    setState(() {
+                      // currentIndex = i;
+                      currentRelation = Tuple2(
+                          edges[i].firstNodeIndex, edges[i].secondNodeIndex);
+                    });
 
-                  break;
-                } else {
-                  setState(() {
-                    currentRelation = const Tuple2(-1, -1);
-                  });
+                    break;
+                  } else {
+                    setState(() {
+                      currentRelation = const Tuple2(-1, -1);
+                    });
+                  }
                 }
-              }
-            },
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Container(
-                color: Colors.amber[100],
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: controller1,
-                  child: SingleChildScrollView(
+              },
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Container(
+                  color: Colors.amber[100],
+                  child: Scrollbar(
+                    thumbVisibility: true,
                     controller: controller1,
-                    scrollDirection: Axis.horizontal,
                     child: SingleChildScrollView(
-                      controller: controller2,
-                      child: GraphWidget(
-                          rootData: data,
-                          currentRelation: currentRelation,
-                          relations: relations,
-                          children: nodesIds
-                              .map((e) => NodeWidget(
-                                    isRoot: e == 0,
-                                    index: e,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      color: Colors.white,
-                                      child: Text(e.toString()),
-                                    ),
-                                  ))
-                              .toList()),
+                      controller: controller1,
+                      scrollDirection: Axis.horizontal,
+                      child: SingleChildScrollView(
+                        controller: controller2,
+                        child: GraphWidget(
+                            rootData: data,
+                            currentRelation: currentRelation,
+                            relations: relations,
+                            children: nodesIds
+                                .map((e) => NodeWidget(
+                                      isRoot: e == 0,
+                                      index: e,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(5),
+                                        color: Colors.white,
+                                        child: Text(e.toString()),
+                                      ),
+                                    ))
+                                .toList()),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
+            child: blurController.currentWidget,
           ),
         );
       },
