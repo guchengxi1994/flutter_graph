@@ -6,6 +6,7 @@ class NodeData {
 
   NodeData({this.children, this.index, this.isRoot});
 
+  @override
   bool operator ==(Object other) {
     if (other is! NodeData) {
       return false;
@@ -43,8 +44,9 @@ class NodeData {
     isRoot = json['isRoot'];
   }
 
-  @Deprecated("maybe useless")
-  List<NodeData> toList() {
+  Map<int, int> countPerDepth = {};
+
+  List<NodeData> toList({bool getDepths = false}) {
     List<NodeData> list = [];
     NodeData d;
     if (_depth == null) {
@@ -60,8 +62,21 @@ class NodeData {
     }
     list.add(d);
 
+    if (getDepths) {
+      for (final n in list) {
+        if (countPerDepth.keys.contains(n.depth!)) {
+          countPerDepth[n.depth!] = countPerDepth[n.depth!]! + 1;
+        } else {
+          countPerDepth[n.depth!] = 1;
+        }
+      }
+    }
+
     return list;
   }
 
   int? get depth => _depth;
+
+  @override
+  int get hashCode => _depth.hashCode + children.hashCode;
 }

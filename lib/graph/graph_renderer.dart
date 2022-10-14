@@ -223,16 +223,22 @@ class RenderGraphWidget extends RenderBox
       required this.relations,
       List<RenderBox>? children,
       this.withArrow = true,
+      this.centerLayout = true,
       required this.nodes,
       required this.rootData}) {
     addAll(children);
   }
 
-  bool withArrow;
+  final bool withArrow;
   BuildContext ctx;
   NodeRelations relations;
   final List<NodeWidget> nodes;
   final NodeData rootData;
+
+  /// TODO
+  ///
+  /// 这里实现按高度居中组件
+  final bool centerLayout;
 
   set currentRelation(Tuple2<int, int> c) {
     if (_currentRelation != c) {
@@ -266,7 +272,9 @@ class RenderGraphWidget extends RenderBox
       return;
     }
 
-    List<NodeData> nodeDatas = rootData.toList();
+    List<NodeData> nodeDatas = rootData.toList(getDepths: true);
+
+    print(rootData.countPerDepth);
 
     /// 初始化区域
     var recordRect = Rect.zero;
@@ -337,6 +345,8 @@ class RenderGraphWidget extends RenderBox
           width: recordRect.width + 30,
         )
         .smallest;
+
+    print(recordRect.height);
   }
 
   @override
