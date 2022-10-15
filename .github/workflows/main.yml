@@ -17,7 +17,7 @@ jobs:
         run: |
           cd example/
           flutter pub get
-          flutter build web  --release --base-href="/flutter-graph/"  --web-renderer html
+          flutter build web  --release --base-href="/flutter_graph/"  --web-renderer html
       - name: "Web Deploy 🚀"
         # https://github.com/JamesIves/github-pages-deploy-action
         uses: JamesIves/github-pages-deploy-action@v4.3.3
