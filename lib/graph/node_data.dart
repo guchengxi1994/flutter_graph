@@ -45,6 +45,7 @@ class NodeData {
   }
 
   Map<int, int> countPerDepth = {};
+  int maxDepth = -1;
 
   List<NodeData> toList({bool getDepths = false}) {
     List<NodeData> list = [];
@@ -63,11 +64,15 @@ class NodeData {
     list.add(d);
 
     if (getDepths) {
+      countPerDepth.clear();
       for (final n in list) {
         if (countPerDepth.keys.contains(n.depth!)) {
           countPerDepth[n.depth!] = countPerDepth[n.depth!]! + 1;
         } else {
           countPerDepth[n.depth!] = 1;
+          if (n.depth! > maxDepth) {
+            maxDepth = n.depth!;
+          }
         }
       }
     }

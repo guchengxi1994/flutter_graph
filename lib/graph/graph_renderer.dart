@@ -133,6 +133,7 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
                   if (edges[i].path == null) {
                     continue;
                   }
+
                   final c = edges[i].path!.contains(details.localPosition) ||
                       edges[i].path!.contains(Offset(details.localPosition.dx,
                           details.localPosition.dy - 1)) ||
@@ -274,7 +275,7 @@ class RenderGraphWidget extends RenderBox
 
     List<NodeData> nodeDatas = rootData.toList(getDepths: true);
 
-    print(rootData.countPerDepth);
+    // print(rootData.countPerDepth);
 
     /// 初始化区域
     var recordRect = Rect.zero;
@@ -287,53 +288,137 @@ class RenderGraphWidget extends RenderBox
 
     RenderBox? child = firstChild;
     var curIndex = 0;
-    while (child != null) {
-      ///提出数据
-      final GraphParentData childParentData =
-          child.parentData as GraphParentData;
 
-      final depth = nodeDatas
-          .firstWhere((element) => element.index == curIndex,
-              orElse: () => NodeData(index: -1))
-          .depth;
+    if (centerLayout) {
+      final maxDepth = (rootData.countPerDepth.values.toList()..sort()).last;
+      final maxHeight = (maxDepth + 1) * nodeVerticalDistance;
 
-      child.layout(
-          const BoxConstraints(
-              minHeight: 1, maxHeight: 100, minWidth: 1, maxWidth: 100),
-          parentUsesSize: true);
+      while (child != null) {
+        final GraphParentData childParentData =
+            child.parentData as GraphParentData;
+        int? depth = nodeDatas
+            .firstWhere((element) => element.index == curIndex,
+                orElse: () => NodeData(index: -1))
+            .depth;
 
-      var childSize = child.size;
+        child.layout(
+            const BoxConstraints(
+                minHeight: 1, maxHeight: 100, minWidth: 1, maxWidth: 100),
+            parentUsesSize: true);
 
-      ///记录大小
-      childParentData.width = childSize.width;
-      childParentData.height = childSize.height;
+        var childSize = child.size;
 
-      late Offset position;
+        ///记录大小
+        childParentData.width = childSize.width;
+        childParentData.height = childSize.height;
 
-      if (curIndex >= 1) {
-        int _positionIndex = 0;
-        while (1 == 1) {
-          position = Offset((depth ?? 1) * nodeHorizontalDistance,
-              childSize.height + _positionIndex * nodeVerticalDistance);
+        late Offset position;
 
-          if (!_positions.contains(position)) {
-            _positions.add(position);
-            // print(position);
-            break;
+        depth = depth ?? 1;
+
+        if (curIndex >= 1) {
+          if (depth > 0) {
+            if (rootData.countPerDepth[depth]! >
+                rootData.countPerDepth[depth - 1]!) {
+              int _positionIndex = 0;
+              while (1 == 1) {
+                position = Offset(
+                    depth * nodeHorizontalDistance,
+                    childSize.height +
+                        _positionIndex * nodeVerticalDistance +
+                        (maxHeight / (rootData.countPerDepth[depth]! + 1)));
+
+                if (!_positions.contains(position)) {
+                  _positions.add(position);
+                  // print(position);
+                  break;
+                } else {
+                  _positionIndex++;
+                }
+              }
+            } else {
+              int _positionIndex = 0;
+              while (1 == 1) {
+                position = Offset(depth * nodeHorizontalDistance,
+                    childSize.height + _positionIndex * nodeVerticalDistance);
+
+                if (!_positions.contains(position)) {
+                  _positions.add(position);
+                  // print(position);
+                  break;
+                } else {
+                  _positionIndex++;
+                }
+              }
+            }
+          }
+        } else {
+          /// 第一个node
+          if (rootData.countPerDepth[depth]! < maxDepth) {
+            position = Offset(
+                childSize.width,
+                childSize.height +
+                    maxHeight / (rootData.countPerDepth[depth]! + 1));
           } else {
-            _positionIndex++;
+            position = Offset(childSize.width, childSize.height);
           }
         }
-      } else {
-        /// 第一个node
-        position = Offset(childSize.width, childSize.height);
-      }
 
-      childParentData.offset = position;
-      previousChildRect = childParentData.content;
-      recordRect = recordRect.expandToInclude(previousChildRect);
-      curIndex++;
-      child = childParentData.nextSibling;
+        childParentData.offset = position;
+        previousChildRect = childParentData.content;
+        recordRect = recordRect.expandToInclude(previousChildRect);
+        curIndex++;
+        child = childParentData.nextSibling;
+      }
+    } else {
+      while (child != null) {
+        ///提出数据
+        final GraphParentData childParentData =
+            child.parentData as GraphParentData;
+
+        final depth = nodeDatas
+            .firstWhere((element) => element.index == curIndex,
+                orElse: () => NodeData(index: -1))
+            .depth;
+
+        child.layout(
+            const BoxConstraints(
+                minHeight: 1, maxHeight: 100, minWidth: 1, maxWidth: 100),
+            parentUsesSize: true);
+
+        var childSize = child.size;
+
+        ///记录大小
+        childParentData.width = childSize.width;
+        childParentData.height = childSize.height;
+
+        late Offset position;
+
+        if (curIndex >= 1) {
+          int _positionIndex = 0;
+          while (1 == 1) {
+            position = Offset((depth ?? 1) * nodeHorizontalDistance,
+                childSize.height + _positionIndex * nodeVerticalDistance);
+
+            if (!_positions.contains(position)) {
+              _positions.add(position);
+              // print(position);
+              break;
+            } else {
+              _positionIndex++;
+            }
+          }
+        } else {
+          /// 第一个node
+          position = Offset(childSize.width, childSize.height);
+        }
+
+        childParentData.offset = position;
+        previousChildRect = childParentData.content;
+        recordRect = recordRect.expandToInclude(previousChildRect);
+        curIndex++;
+        child = childParentData.nextSibling;
+      }
     }
 
     ///调整布局大小
@@ -345,8 +430,6 @@ class RenderGraphWidget extends RenderBox
           width: recordRect.width + 30,
         )
         .smallest;
-
-    print(recordRect.height);
   }
 
   @override
@@ -397,25 +480,35 @@ class RenderGraphWidget extends RenderBox
             secondNodeOffset.dy,
           );
         } else {
-          linePath.moveTo(start.dx, start.dy);
-          linePath.cubicTo(
-              start.dx,
-              start.dy + nodeVerticalDistance / 2,
-              end.dx,
-              end.dy - nodeVerticalDistance / 2,
-              end.dx,
-              end.dy - triangleArrowHeight);
+          if (firstNodeOffset.dy < secondNodeOffset.dy) {
+            linePath.moveTo(start.dx, start.dy);
+            linePath.cubicTo(
+                start.dx,
+                start.dy + nodeVerticalDistance / 2,
+                end.dx,
+                end.dy - nodeVerticalDistance / 2,
+                end.dx,
+                end.dy - triangleArrowHeight);
+          } else {
+            start = Offset(firstData.right + offset.dx,
+                (firstData.bottom + firstData.top) / 2 + offset.dy);
+
+            end = Offset((secondData.left + secondData.right) / 2 + offset.dx,
+                secondData.bottom + offset.dy);
+            linePath.moveTo(start.dx, start.dy);
+            linePath.cubicTo(start.dx, start.dy - nodeVerticalDistance / 2,
+                end.dx, end.dy + nodeVerticalDistance / 2, end.dx, end.dy);
+          }
         }
 
         if (withArrow) {
           linePath = ArrowPath.make(path: linePath);
         }
-        if (ctx.read<EdgeController>().edges.length < children.length - 1) {
-          ctx.read<EdgeController>().addEdge(Edge(
-              path: linePath,
-              firstNodeIndex: relation.item1,
-              secondNodeIndex: relation.item2));
-        }
+
+        ctx.read<EdgeController>().addEdge(Edge(
+            path: linePath,
+            firstNodeIndex: relation.item1,
+            secondNodeIndex: relation.item2));
 
         canvas.drawPath(linePath, paint);
       }
