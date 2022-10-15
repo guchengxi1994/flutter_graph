@@ -2,16 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_graph/graph/blur_controller.dart';
 import 'package:provider/provider.dart';
 
+class DemoNodeWidgetData {
+  String? url;
+  String? name;
+  int? index;
+
+  DemoNodeWidgetData({this.url, this.name, this.index});
+
+  DemoNodeWidgetData.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
+    name = json['name'];
+    index = json['index'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['url'] = url;
+    data['name'] = name;
+    data['index'] = index;
+    return data;
+  }
+}
+
 class NodeWidget extends StatelessWidget {
-  NodeWidget(
-      {Key? key,
-      this.builder,
-      this.child,
-      this.backgroundColor,
-      required this.index,
-      this.onTap,
-      this.isRoot = false})
-      : assert(builder != null || child != null),
+  NodeWidget({
+    Key? key,
+    this.builder,
+    this.child,
+    this.backgroundColor,
+    required this.index,
+    this.onTap,
+    this.isRoot = false,
+  })  : assert(builder != null || child != null),
         super(key: key);
   final Widget? child;
   final Builder? builder;
@@ -93,9 +115,13 @@ class FakeNodeWidget extends StatelessWidget {
             onHover: (event) {
               context.read<BlurController>().changeState(true);
             },
-            child: InkWell(
-              onTap: onTap,
-              child: child ?? builder,
+            child: Container(
+              constraints: const BoxConstraints(
+                  minHeight: 1, maxHeight: 100, minWidth: 1, maxWidth: 100),
+              child: InkWell(
+                onTap: onTap,
+                child: child ?? builder,
+              ),
             )));
   }
 }

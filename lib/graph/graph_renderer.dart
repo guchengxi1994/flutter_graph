@@ -22,16 +22,26 @@ class GraphDemoPage extends StatefulWidget {
 }
 
 class _GraphDemoPageState extends State<GraphDemoPage> {
-  List<int> nodesIds = [0, 1, 2, 3];
+  // List<int> nodesIds = [0, 1, 2, 3];
   final ScrollController controller1 = ScrollController();
   final ScrollController controller2 = ScrollController();
   Tuple2<int, int> currentRelation = const Tuple2(-1, -1);
+  List<DemoNodeWidgetData> nodesData = [];
 
   NodeData data = NodeData();
+
+  final names = ["壹零", "最伟大的工程师", "文件A"];
+  final urls = ["assets/images/file.png", "assets/images/user.png"];
 
   @override
   void initState() {
     super.initState();
+
+    for (int i = 0; i < 20; i++) {
+      nodesData.add(
+          DemoNodeWidgetData(index: i, url: urls[i % 2], name: names[i % 3]));
+    }
+
     data.index = 0;
     data.isRoot = true;
     data.children = [];
@@ -102,7 +112,10 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
               ),
               onPressed: () {
                 setState(() {
-                  nodesIds.add(nodesIds.length);
+                  nodesData.add(DemoNodeWidgetData(
+                      index: nodesData.length,
+                      url: urls[nodesData.length % 2],
+                      name: names[nodesData.length % 3]));
                 });
               },
               child: const Text(
@@ -114,8 +127,8 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
               style: TextButton.styleFrom(backgroundColor: Colors.indigoAccent),
               onPressed: () {
                 setState(() {
-                  if (nodesIds.length > 1) {
-                    nodesIds.removeLast();
+                  if (nodesData.length > 1) {
+                    nodesData.removeLast();
                   }
                 });
               },
@@ -129,22 +142,28 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
             blurValue: blurController.shouldBlur ? 1.5 : 0,
             widget: GestureDetector(
               onTapDown: (details) {
+                Offset position = Offset(
+                    controller1.offset + details.localPosition.dx,
+                    controller2.offset + details.localPosition.dy);
+
                 for (int i = 0; i < edges.length; i++) {
                   if (edges[i].path == null) {
                     continue;
                   }
 
-                  final c = edges[i].path!.contains(details.localPosition) ||
-                      edges[i].path!.contains(Offset(details.localPosition.dx,
-                          details.localPosition.dy - 1)) ||
-                      edges[i].path!.contains(Offset(details.localPosition.dx,
-                          details.localPosition.dy + 1)) ||
-                      edges[i].path!.contains(Offset(
-                          details.localPosition.dx - 1,
-                          details.localPosition.dy)) ||
-                      edges[i].path!.contains(Offset(
-                          details.localPosition.dx + 1,
-                          details.localPosition.dy));
+                  final c = edges[i].path!.contains(position) ||
+                      edges[i]
+                          .path!
+                          .contains(Offset(position.dx, position.dy - 1)) ||
+                      edges[i]
+                          .path!
+                          .contains(Offset(position.dx, position.dy + 1)) ||
+                      edges[i]
+                          .path!
+                          .contains(Offset(position.dx - 1, position.dy)) ||
+                      edges[i]
+                          .path!
+                          .contains(Offset(position.dx + 1, position.dy));
 
                   if (c) {
                     setState(() {
@@ -175,17 +194,36 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
                       child: SingleChildScrollView(
                         controller: controller2,
                         child: GraphWidget(
+                            nodeHorizontalDistance: 180,
+                            nodeVerticalDistance: 200,
                             rootData: data,
                             currentRelation: currentRelation,
                             relations: relations,
-                            children: nodesIds
+                            children: nodesData
                                 .map((e) => NodeWidget(
-                                      isRoot: e == 0,
-                                      index: e,
+                                      isRoot: e.index == 0,
+                                      index: e.index!,
                                       child: Container(
                                         padding: const EdgeInsets.all(5),
                                         color: Colors.white,
-                                        child: Text(e.toString()),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            SizedBox(
+                                              width: 40,
+                                              height: 40,
+                                              child: Image.asset(e.url!),
+                                            ),
+                                            Text(
+                                              e.name.toString(),
+                                              softWrap: true,
+                                              overflow: TextOverflow.ellipsis,
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ))
                                 .toList()),
@@ -226,7 +264,9 @@ class RenderGraphWidget extends RenderBox
       this.withArrow = true,
       this.centerLayout = true,
       required this.nodes,
-      required this.rootData}) {
+      required this.rootData,
+      required this.nodeHorizontalDistance,
+      required this.nodeVerticalDistance}) {
     addAll(children);
   }
 
@@ -235,6 +275,8 @@ class RenderGraphWidget extends RenderBox
   NodeRelations relations;
   final List<NodeWidget> nodes;
   final NodeData rootData;
+  final double nodeHorizontalDistance;
+  final double nodeVerticalDistance;
 
   /// TODO
   ///
@@ -254,8 +296,6 @@ class RenderGraphWidget extends RenderBox
   // ignore: prefer_final_fields
   late Tuple2<int, int> _currentRelation = const Tuple2(-1, -1);
 
-  final double nodeHorizontalDistance = 150;
-  final double nodeVerticalDistance = 100;
   final double triangleArrowHeight = 8.0;
 
   ///设置为我们的数据
@@ -481,23 +521,43 @@ class RenderGraphWidget extends RenderBox
           );
         } else {
           if (firstNodeOffset.dy < secondNodeOffset.dy) {
+            start = Offset(firstData.right + offset.dx,
+                (firstData.bottom + firstData.top) / 2 + offset.dy);
+            end = Offset(secondData.left + offset.dx,
+                (secondData.bottom + secondData.top) / 2 + offset.dy);
             linePath.moveTo(start.dx, start.dy);
+            // linePath.cubicTo(
+            //     start.dx + 0.25 * nodeHorizontalDistance,
+            //     start.dy,
+            //     end.dx,
+            //     end.dy - nodeVerticalDistance / 2,
+            //     end.dx,
+            //     end.dy - triangleArrowHeight);
             linePath.cubicTo(
-                start.dx,
-                start.dy + nodeVerticalDistance / 2,
-                end.dx,
-                end.dy - nodeVerticalDistance / 2,
-                end.dx,
-                end.dy - triangleArrowHeight);
+              start.dx + 0.25 * nodeHorizontalDistance,
+              start.dy,
+              end.dx - 0.4 * nodeHorizontalDistance,
+              end.dy - 0.5 * nodeVerticalDistance + secondData.height,
+              end.dx,
+              end.dy,
+            );
           } else {
             start = Offset(firstData.right + offset.dx,
                 (firstData.bottom + firstData.top) / 2 + offset.dy);
 
-            end = Offset((secondData.left + secondData.right) / 2 + offset.dx,
-                secondData.bottom + offset.dy);
+            // end = Offset((secondData.left + secondData.right) / 2 + offset.dx,
+            //     secondData.bottom + offset.dy);
+            end = Offset(secondData.left + offset.dx,
+                (secondData.bottom + secondData.top) / 2 + offset.dy);
             linePath.moveTo(start.dx, start.dy);
-            linePath.cubicTo(start.dx, start.dy - nodeVerticalDistance / 2,
-                end.dx, end.dy + nodeVerticalDistance / 2, end.dx, end.dy);
+            linePath.cubicTo(
+              start.dx + 0.25 * nodeHorizontalDistance,
+              start.dy,
+              end.dx - 0.25 * nodeHorizontalDistance,
+              end.dy - 0.5 * nodeVerticalDistance + secondData.height,
+              end.dx,
+              end.dy,
+            );
           }
         }
 
@@ -536,12 +596,16 @@ class GraphWidget extends MultiChildRenderObjectWidget {
       List<Widget> children = const <Widget>[],
       required this.relations,
       required this.currentRelation,
-      required this.rootData})
+      required this.rootData,
+      this.nodeHorizontalDistance = 150,
+      this.nodeVerticalDistance = 100})
       : super(children: children, key: key);
 
   Tuple2<int, int> currentRelation;
   NodeRelations relations;
   NodeData rootData;
+  final double nodeHorizontalDistance;
+  final double nodeVerticalDistance;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -549,7 +613,9 @@ class GraphWidget extends MultiChildRenderObjectWidget {
         ctx: context,
         relations: relations,
         nodes: children as List<NodeWidget>,
-        rootData: rootData);
+        rootData: rootData,
+        nodeHorizontalDistance: nodeHorizontalDistance,
+        nodeVerticalDistance: nodeVerticalDistance);
   }
 
   @override

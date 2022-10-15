@@ -1,0 +1,26 @@
+name:  Build and Deploy
+on: [push]
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - uses: subosito/flutter-action@v2.5.0
+        with:
+          flutter-version: '3.0.5'
+          channel: 'stable'
+          cache: true
+      - run: flutter --version
+      - name: "Web Build 🔧"
+        run: |
+          cd example/
+          flutter pub get
+          flutter build web  --release --base-href="/flutter-graph/"  --web-renderer html
+      - name: "Web Deploy 🚀"
+        # https://github.com/JamesIves/github-pages-deploy-action
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: demo
+          folder: ./example/build/web
