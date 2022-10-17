@@ -1,5 +1,4 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
-import 'package:blurred/blurred.dart';
 import 'package:flutter_graph/graph/_arrow_painter.dart';
 import 'package:flutter_graph/graph/edge_controller.dart';
 import 'package:flutter/material.dart';
@@ -8,255 +7,16 @@ import 'package:flutter_graph/graph/node_data.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import 'blur_controller.dart';
+import '_graph_parent_data.dart';
 import 'edge.dart';
-import 'graph.dart';
+import 'flow_graph.dart';
 import 'node.dart';
 
-class GraphDemoPage extends StatefulWidget {
-  const GraphDemoPage({Key? key}) : super(key: key);
-
-  @override
-  State<GraphDemoPage> createState() => _GraphDemoPageState();
-}
-
-class _GraphDemoPageState extends State<GraphDemoPage> {
-  // List<int> nodesIds = [0, 1, 2, 3];
-  final ScrollController controller1 = ScrollController();
-  final ScrollController controller2 = ScrollController();
-  Tuple2<int, int> currentRelation = const Tuple2(-1, -1);
-  List<DemoNodeWidgetData> nodesData = [];
-
-  NodeData data = NodeData();
-
-  final names = ["壹零", "工程师", "文件A"];
-  final urls = ["assets/images/file.png", "assets/images/user.png"];
-
-  @override
-  void initState() {
-    super.initState();
-
-    for (int i = 0; i < 20; i++) {
-      nodesData.add(
-          DemoNodeWidgetData(index: i, url: urls[i % 2], name: names[i % 3]));
-    }
-
-    data.index = 0;
-    data.isRoot = true;
-    data.children = [];
-
-    NodeData data1 = NodeData();
-    data1.index = 1;
-    data1.isRoot = false;
-    data1.children = [];
-
-    NodeData data2 = NodeData();
-    data2.index = 2;
-    data2.isRoot = false;
-    data2.children = [];
-
-    data.children!.add(data1);
-    data.children!.add(data2);
-
-    NodeData data3 = NodeData();
-    data3.index = 3;
-    data3.isRoot = false;
-    data3.children = [];
-
-    NodeData data4 = NodeData();
-    data4.index = 4;
-    data4.isRoot = false;
-    data4.children = [];
-
-    data1.children!.add(data3);
-    data3.children!.add(data4);
-
-    data.children!.add(NodeData(index: 5, children: []));
-    data.children!.add(NodeData(index: 6, children: []));
-    data.children!.add(NodeData(index: 7, children: []));
-    data.children!.add(NodeData(index: 8, children: []));
-    data.children!.add(NodeData(index: 9, children: []));
-    data.children!.add(NodeData(index: 10, children: []));
-    data.children!.add(NodeData(index: 11, children: []));
-  }
-
-  @override
-  void dispose() {
-    controller1.dispose();
-    controller2.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final relations = NodeData.fromJson(data.toJson()).toRelations();
-
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => EdgeController(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => BlurController(),
-        ),
-      ],
-      builder: (context, child) {
-        final edges = context.read<EdgeController>().edges;
-        BlurController blurController = context.watch<BlurController>();
-        return Scaffold(
-          persistentFooterButtons: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.amberAccent,
-              ),
-              onPressed: () {
-                setState(() {
-                  nodesData.add(DemoNodeWidgetData(
-                      index: nodesData.length,
-                      url: urls[nodesData.length % 2],
-                      name: names[nodesData.length % 3]));
-                });
-              },
-              child: const Text(
-                "加",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(backgroundColor: Colors.indigoAccent),
-              onPressed: () {
-                setState(() {
-                  if (nodesData.length > 1) {
-                    nodesData.removeLast();
-                  }
-                });
-              },
-              child: const Text(
-                "减",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-          body: Blurred(
-            blurValue: blurController.shouldBlur ? 1.5 : 0,
-            widget: GestureDetector(
-              onTapDown: (details) {
-                Offset position = Offset(
-                    controller1.offset + details.localPosition.dx,
-                    controller2.offset + details.localPosition.dy);
-
-                for (int i = 0; i < edges.length; i++) {
-                  if (edges[i].path == null) {
-                    continue;
-                  }
-
-                  final c = edges[i].path!.contains(position) ||
-                      edges[i]
-                          .path!
-                          .contains(Offset(position.dx, position.dy - 1)) ||
-                      edges[i]
-                          .path!
-                          .contains(Offset(position.dx, position.dy + 1)) ||
-                      edges[i]
-                          .path!
-                          .contains(Offset(position.dx - 1, position.dy)) ||
-                      edges[i]
-                          .path!
-                          .contains(Offset(position.dx + 1, position.dy));
-
-                  if (c) {
-                    setState(() {
-                      // currentIndex = i;
-                      currentRelation = Tuple2(
-                          edges[i].firstNodeIndex, edges[i].secondNodeIndex);
-                    });
-
-                    break;
-                  } else {
-                    setState(() {
-                      currentRelation = const Tuple2(-1, -1);
-                    });
-                  }
-                }
-              },
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: Container(
-                  color: Colors.amber[100],
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    controller: controller1,
-                    child: SingleChildScrollView(
-                      controller: controller1,
-                      scrollDirection: Axis.horizontal,
-                      child: SingleChildScrollView(
-                        controller: controller2,
-                        child: GraphWidget(
-                            nodeHorizontalDistance: 250,
-                            nodeVerticalDistance: 200,
-                            rootData: data,
-                            currentRelation: currentRelation,
-                            relations: relations,
-                            children: nodesData
-                                .map((e) => NodeWidget(
-                                      isRoot: e.index == 0,
-                                      index: e.index!,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(5),
-                                        color: Colors.white,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              width: 40,
-                                              height: 40,
-                                              child: Image.asset(e.url!),
-                                            ),
-                                            Text(
-                                              e.name.toString(),
-                                              softWrap: true,
-                                              overflow: TextOverflow.ellipsis,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ))
-                                .toList()),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            child: blurController.currentWidget,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class GraphParentData extends ContainerBoxParentData<RenderBox> {
-  late double width;
-  late double height;
-
-  Rect get content => Rect.fromLTWH(
-        offset.dx,
-        offset.dy,
-        width,
-        height,
-      );
-}
-
-class RenderGraphWidget extends RenderBox
+class RenderFlowGraphWidget extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, GraphParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, GraphParentData> {
-  RenderGraphWidget(
+  RenderFlowGraphWidget(
       {required this.ctx,
       required this.relations,
       List<RenderBox>? children,
@@ -591,8 +351,8 @@ class RenderGraphWidget extends RenderBox
 }
 
 // ignore: must_be_immutable
-class GraphWidget extends MultiChildRenderObjectWidget {
-  GraphWidget(
+class FlowGraphWidget extends MultiChildRenderObjectWidget {
+  FlowGraphWidget(
       {Key? key,
       List<Widget> children = const <Widget>[],
       required this.relations,
@@ -610,7 +370,7 @@ class GraphWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderGraphWidget(
+    return RenderFlowGraphWidget(
         ctx: context,
         relations: relations,
         nodes: children as List<NodeWidget>,
@@ -621,7 +381,7 @@ class GraphWidget extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderGraphWidget renderObject) {
+      BuildContext context, covariant RenderFlowGraphWidget renderObject) {
     renderObject.currentRelation = currentRelation;
     renderObject.ctx = context;
   }

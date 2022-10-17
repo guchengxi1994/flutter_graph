@@ -2,28 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_graph/graph/blur_controller.dart';
 import 'package:provider/provider.dart';
 
-class DemoNodeWidgetData {
-  String? url;
-  String? name;
-  int? index;
-
-  DemoNodeWidgetData({this.url, this.name, this.index});
-
-  DemoNodeWidgetData.fromJson(Map<String, dynamic> json) {
-    url = json['url'];
-    name = json['name'];
-    index = json['index'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['url'] = url;
-    data['name'] = name;
-    data['index'] = index;
-    return data;
-  }
-}
-
 class NodeWidget extends StatelessWidget {
   NodeWidget({
     Key? key,
