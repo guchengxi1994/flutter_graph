@@ -1,7 +1,6 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
-
-import 'package:arrow_path/arrow_path.dart';
 import 'package:blurred/blurred.dart';
+import 'package:flutter_graph/graph/_arrow_painter.dart';
 import 'package:flutter_graph/graph/edge_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -30,7 +29,7 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
 
   NodeData data = NodeData();
 
-  final names = ["壹零", "最伟大的工程师", "文件A"];
+  final names = ["壹零", "工程师", "文件A"];
   final urls = ["assets/images/file.png", "assets/images/user.png"];
 
   @override
@@ -194,7 +193,7 @@ class _GraphDemoPageState extends State<GraphDemoPage> {
                       child: SingleChildScrollView(
                         controller: controller2,
                         child: GraphWidget(
-                            nodeHorizontalDistance: 180,
+                            nodeHorizontalDistance: 250,
                             nodeVerticalDistance: 200,
                             rootData: data,
                             currentRelation: currentRelation,
@@ -261,26 +260,25 @@ class RenderGraphWidget extends RenderBox
       {required this.ctx,
       required this.relations,
       List<RenderBox>? children,
-      this.withArrow = true,
       this.centerLayout = true,
       required this.nodes,
       required this.rootData,
       required this.nodeHorizontalDistance,
-      required this.nodeVerticalDistance}) {
+      required this.nodeVerticalDistance,
+      this.unSelectedEdgeColor = Colors.redAccent,
+      this.selectedEdgeColor = Colors.black}) {
     addAll(children);
   }
 
-  final bool withArrow;
   BuildContext ctx;
   NodeRelations relations;
   final List<NodeWidget> nodes;
   final NodeData rootData;
   final double nodeHorizontalDistance;
   final double nodeVerticalDistance;
+  final Color unSelectedEdgeColor;
+  final Color selectedEdgeColor;
 
-  /// TODO
-  ///
-  /// 这里实现按高度居中组件
   final bool centerLayout;
 
   set currentRelation(Tuple2<int, int> c) {
@@ -361,16 +359,12 @@ class RenderGraphWidget extends RenderBox
             if (rootData.countPerDepth[depth]! >
                 rootData.countPerDepth[depth - 1]!) {
               int _positionIndex = 0;
-              while (1 == 1) {
-                position = Offset(
-                    depth * nodeHorizontalDistance,
-                    childSize.height +
-                        _positionIndex * nodeVerticalDistance +
-                        (maxHeight / (rootData.countPerDepth[depth]! + 1)));
+              while (true) {
+                position = Offset(depth * nodeHorizontalDistance,
+                    childSize.height + _positionIndex * nodeVerticalDistance);
 
                 if (!_positions.contains(position)) {
                   _positions.add(position);
-                  // print(position);
                   break;
                 } else {
                   _positionIndex++;
@@ -378,7 +372,7 @@ class RenderGraphWidget extends RenderBox
               }
             } else {
               int _positionIndex = 0;
-              while (1 == 1) {
+              while (true) {
                 position = Offset(depth * nodeHorizontalDistance,
                     childSize.height + _positionIndex * nodeVerticalDistance);
 
@@ -472,14 +466,14 @@ class RenderGraphWidget extends RenderBox
         .smallest;
   }
 
+  final double arrowSize = 15;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     var canvas = context.canvas;
     canvas.save();
 
     final children = getChildrenAsList();
-
-    // print(relations.relations.length);
 
     for (int i = 0; i < relations.relations.length; i++) {
       Tuple2<int, int> relation = relations.getByIndex(i);
@@ -489,13 +483,17 @@ class RenderGraphWidget extends RenderBox
             (children[relation.item1].parentData! as GraphParentData).content;
         final secondData =
             (children[relation.item2].parentData! as GraphParentData).content;
+        final lineColor = currentRelation == relation
+            ? selectedEdgeColor
+            : unSelectedEdgeColor;
         Paint paint = Paint()
-          ..color = currentRelation == relation ? Colors.black : Colors.red
+          ..color = lineColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3.0;
         var linePath = Path();
 
         linePath.reset();
+        late ArrowPainter arrowPainter;
 
         final firstNodeOffset = Offset(firstData.right + offset.dx,
             firstData.top + 0.5 * firstData.height + offset.dy);
@@ -516,9 +514,17 @@ class RenderGraphWidget extends RenderBox
             firstNodeOffset.dy,
             firstNodeOffset.dx + 10,
             firstNodeOffset.dy + 10,
-            secondNodeOffset.dx,
+            secondNodeOffset.dx - arrowSize,
             secondNodeOffset.dy,
           );
+
+          arrowPainter = ArrowPainter(
+              arrowPosition: secondNodeOffset,
+              canvas: canvas,
+              angleColor: lineColor,
+              arrowSize: arrowSize);
+
+          arrowPainter.render();
         } else {
           if (firstNodeOffset.dy < secondNodeOffset.dy) {
             start = Offset(firstData.right + offset.dx,
@@ -526,27 +532,18 @@ class RenderGraphWidget extends RenderBox
             end = Offset(secondData.left + offset.dx,
                 (secondData.bottom + secondData.top) / 2 + offset.dy);
             linePath.moveTo(start.dx, start.dy);
-            // linePath.cubicTo(
-            //     start.dx + 0.25 * nodeHorizontalDistance,
-            //     start.dy,
-            //     end.dx,
-            //     end.dy - nodeVerticalDistance / 2,
-            //     end.dx,
-            //     end.dy - triangleArrowHeight);
             linePath.cubicTo(
               start.dx + 0.25 * nodeHorizontalDistance,
               start.dy,
               end.dx - 0.4 * nodeHorizontalDistance,
               end.dy - 0.5 * nodeVerticalDistance + secondData.height,
-              end.dx,
+              end.dx - arrowSize,
               end.dy,
             );
           } else {
             start = Offset(firstData.right + offset.dx,
                 (firstData.bottom + firstData.top) / 2 + offset.dy);
 
-            // end = Offset((secondData.left + secondData.right) / 2 + offset.dx,
-            //     secondData.bottom + offset.dy);
             end = Offset(secondData.left + offset.dx,
                 (secondData.bottom + secondData.top) / 2 + offset.dy);
             linePath.moveTo(start.dx, start.dy);
@@ -555,20 +552,24 @@ class RenderGraphWidget extends RenderBox
               start.dy,
               end.dx - 0.25 * nodeHorizontalDistance,
               end.dy - 0.5 * nodeVerticalDistance + secondData.height,
-              end.dx,
+              end.dx - arrowSize,
               end.dy,
             );
           }
-        }
+          arrowPainter = ArrowPainter(
+              arrowPosition: end,
+              canvas: canvas,
+              angleColor: lineColor,
+              arrowSize: arrowSize);
 
-        if (withArrow) {
-          linePath = ArrowPath.make(path: linePath);
+          arrowPainter.render();
         }
 
         ctx.read<EdgeController>().addEdge(Edge(
-            path: linePath,
-            firstNodeIndex: relation.item1,
-            secondNodeIndex: relation.item2));
+              path: linePath,
+              firstNodeIndex: relation.item1,
+              secondNodeIndex: relation.item2,
+            ));
 
         canvas.drawPath(linePath, paint);
       }

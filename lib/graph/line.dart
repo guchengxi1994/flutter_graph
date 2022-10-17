@@ -1,4 +1,3 @@
-import 'package:arrow_path/arrow_path.dart';
 import 'package:flutter/material.dart';
 
 class LinePainter extends CustomPainter {
@@ -38,9 +37,6 @@ class LinePainter extends CustomPainter {
         secondNodeOffset.dx,
         secondNodeOffset.dy,
       );
-      if (withArrow) {
-        linePath = ArrowPath.make(path: linePath);
-      }
 
       canvas.drawPath(linePath, paint);
     }
