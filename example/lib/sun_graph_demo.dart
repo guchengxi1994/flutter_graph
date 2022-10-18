@@ -29,19 +29,17 @@ class _SunGraphDemoState extends State<SunGraphPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final Offset center = size.center(Offset.zero);
 
     return Scaffold(
       backgroundColor: Colors.amberAccent,
       body: SizedBox(
         width: size.width,
         height: size.height,
-        child: SunGraphWidget(
+        child: SunGraph(
           relations: nodeRelations,
-          center: center,
-          width: size.width,
-          height: size.height,
-          children: nodesData
+          widgetWidth: size.width,
+          widgetHeight: size.height,
+          nodes: nodesData
               .map((e) => Container(
                     // color: Colors.transparent,
                     decoration: BoxDecoration(

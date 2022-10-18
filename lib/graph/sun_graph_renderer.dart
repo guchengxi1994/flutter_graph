@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,7 +7,6 @@ import 'package:tuple/tuple.dart';
 import '_arrow_painter.dart';
 import '_graph_parent_data.dart';
 import 'node_relations.dart';
-import 'flow_graph.dart';
 
 class RenderSunGraphWidget extends RenderBox
     with
@@ -104,14 +102,17 @@ class RenderSunGraphWidget extends RenderBox
       }
 
       childParentData.offset = position;
+      recordRect = recordRect.expandToInclude(childParentData.content);
       curIndex++;
       child = childParentData.nextSibling;
     }
 
     size = constraints
         .tighten(
-          height: recordRect.height,
-          width: recordRect.width,
+          // 底部加长30
+          height: recordRect.height + 30,
+          // 右侧拓宽30
+          width: recordRect.width + 30,
         )
         .smallest;
   }
@@ -125,6 +126,7 @@ class RenderSunGraphWidget extends RenderBox
 
     final children = getChildrenAsList();
     late ArrowPainter arrowPainter;
+    List<Offset> positions = [];
 
     for (int i = 0; i < relations.relations.length; i++) {
       Tuple2<int, int> relation = relations.getByIndex(i);
@@ -134,6 +136,8 @@ class RenderSunGraphWidget extends RenderBox
             (children[relation.item1].parentData! as GraphParentData).content;
         final secondData =
             (children[relation.item2].parentData! as GraphParentData).content;
+
+        bool isSecondNodeRoot = relation.item2 == 0;
 
         var linePath = Path();
 
@@ -170,6 +174,27 @@ class RenderSunGraphWidget extends RenderBox
                 secondData.bottom + offset.dy);
           }
 
+          if (isSecondNodeRoot) {
+            int k = 1;
+            while (true) {
+              if ((firstData.left - secondData.left).abs() >
+                  (firstData.right - secondData.left).abs()) {
+                end =
+                    Offset(secondData.left + k * arrowSize + offset.dx, end.dy);
+              } else {
+                end = Offset(
+                    secondData.right - k * arrowSize + offset.dx, end.dy);
+              }
+
+              if (!positions.contains(end)) {
+                positions.add(end);
+                break;
+              } else {
+                k = k + 1;
+              }
+            }
+          }
+
           t = (end.dy - start.dy) / (end.dx - start.dx + 0.001);
 
           double tanAngle;
@@ -201,6 +226,28 @@ class RenderSunGraphWidget extends RenderBox
             end = Offset(secondData.right + offset.dx,
                 (secondData.top + secondData.bottom) / 2 + offset.dy);
           }
+
+          if (isSecondNodeRoot) {
+            int k = 1;
+            while (true) {
+              if ((firstData.top - secondData.top).abs() >
+                  (firstData.bottom - secondData.top).abs()) {
+                end =
+                    Offset(end.dx, secondData.top + k * arrowSize + offset.dy);
+              } else {
+                end = Offset(
+                    end.dx, secondData.bottom - k * arrowSize + offset.dy);
+              }
+
+              if (!positions.contains(end)) {
+                positions.add(end);
+                break;
+              } else {
+                k = k + 1;
+              }
+            }
+          }
+
           t = (end.dy - start.dy) / (end.dx - start.dx + 0.001);
           arrowPainter = ArrowPainter(
               arrowPosition: end,
