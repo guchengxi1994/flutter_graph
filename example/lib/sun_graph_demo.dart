@@ -9,7 +9,22 @@ class SunGraphPage extends StatefulWidget {
 }
 
 class _SunGraphDemoState extends State<SunGraphPage> {
-  List<int> nodesData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  List<int> nodesData = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  NodeRelations nodeRelations = NodeRelations(relations: const [
+    Tuple2<int, int>(0, 2),
+    Tuple2<int, int>(0, 3),
+    Tuple2<int, int>(0, 4),
+    Tuple2<int, int>(0, 5),
+    Tuple2<int, int>(0, 6),
+    Tuple2<int, int>(7, 0),
+    Tuple2<int, int>(8, 0),
+    Tuple2<int, int>(9, 0),
+    Tuple2<int, int>(10, 0),
+    Tuple2<int, int>(11, 0),
+    Tuple2<int, int>(12, 0),
+    Tuple2<int, int>(13, 0),
+    Tuple2<int, int>(1, 0),
+  ]);
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +37,21 @@ class _SunGraphDemoState extends State<SunGraphPage> {
         width: size.width,
         height: size.height,
         child: SunGraphWidget(
+          relations: nodeRelations,
           center: center,
           width: size.width,
           height: size.height,
           children: nodesData
               .map((e) => Container(
-                    color: Colors.white,
+                    // color: Colors.transparent,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white, width: 2),
+                        color: Colors.transparent),
                     padding: const EdgeInsets.all(5),
-                    child: Text(e.toString()),
+                    child: Center(
+                        child: Text(
+                      e.toString(),
+                    )),
                   ))
               .toList(),
         ),

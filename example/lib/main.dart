@@ -43,8 +43,8 @@ class MyApp extends StatelessWidget {
 
 class Routers {
   static const pageMain = "/pageMain";
-  static const pageGraph = "pageGraph";
-  static const pageSun = "pageSun";
+  static const pageGraph = "/pageGraph";
+  static const pageSun = "/pageSun";
 
   static Map<String, WidgetBuilder> routers = {
     pageMain: (context) => const PushTO(),

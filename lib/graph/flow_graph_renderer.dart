@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '_graph_parent_data.dart';
+import 'node_relations.dart';
 import 'edge.dart';
-import 'flow_graph.dart';
 import 'node.dart';
 
 class RenderFlowGraphWidget extends RenderBox
