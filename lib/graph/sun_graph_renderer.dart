@@ -2,10 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '_arrow_painter.dart';
 import '_graph_parent_data.dart';
+import 'edge.dart';
+import 'edge_controller.dart';
 import 'node_relations.dart';
 
 class RenderSunGraphWidget extends RenderBox
@@ -15,8 +18,8 @@ class RenderSunGraphWidget extends RenderBox
   RenderSunGraphWidget(
       {required this.ctx,
       List<RenderBox>? children,
-      this.unSelectedEdgeColor = Colors.redAccent,
-      this.selectedEdgeColor = Colors.black,
+      this.unSelectedEdgeColor = Colors.grey,
+      this.selectedEdgeColor = Colors.red,
       required this.width,
       required this.height,
       required this.center,
@@ -48,6 +51,13 @@ class RenderSunGraphWidget extends RenderBox
     }
   }
 
+  set currentRelation(Tuple2<int, int> c) {
+    if (_currentRelation != c) {
+      _currentRelation = c;
+      markNeedsLayout();
+    }
+  }
+
   late double r;
 
   @override
@@ -66,6 +76,10 @@ class RenderSunGraphWidget extends RenderBox
     }
 
     r = distanceBetweenNodes / (2 * math.cos((math.pi - angle) / 2));
+
+    if (r < distanceBetweenNodes) {
+      r = distanceBetweenNodes;
+    }
 
     var recordRect =
         Rect.fromCenter(center: center, width: width, height: height);
@@ -175,22 +189,17 @@ class RenderSunGraphWidget extends RenderBox
           }
 
           if (isSecondNodeRoot) {
-            int k = 1;
+            int k = 0;
+            int kk = 1;
             while (true) {
-              if ((firstData.left - secondData.left).abs() >
-                  (firstData.right - secondData.left).abs()) {
-                end =
-                    Offset(secondData.left + k * arrowSize + offset.dx, end.dy);
-              } else {
-                end = Offset(
-                    secondData.right - k * arrowSize + offset.dx, end.dy);
-              }
+              end = Offset(end.dx + kk * k * arrowSize / 2 + offset.dx, end.dy);
 
               if (!positions.contains(end)) {
                 positions.add(end);
                 break;
               } else {
                 k = k + 1;
+                kk = -kk;
               }
             }
           }
@@ -211,6 +220,16 @@ class RenderSunGraphWidget extends RenderBox
               angleColor: lineColor,
               arrowSize: arrowSize,
               angle: tanAngle);
+
+          linePath.moveTo(start.dx, start.dy);
+          linePath.cubicTo(
+            start.dx,
+            start.dy,
+            (start.dx + end.dx) / 2 - 5,
+            (start.dy + end.dy) / 2,
+            end.dx,
+            end.dy,
+          );
         } else {
           // 左右连接
           // 第一个在在左侧
@@ -255,17 +274,17 @@ class RenderSunGraphWidget extends RenderBox
               angleColor: lineColor,
               arrowSize: arrowSize,
               angle: math.atan(t));
-        }
 
-        linePath.moveTo(start.dx, start.dy);
-        linePath.cubicTo(
-          start.dx,
-          start.dy - 25,
-          (start.dx + end.dx) / 2,
-          (start.dy + end.dy) / 2 - 50,
-          end.dx,
-          end.dy,
-        );
+          linePath.moveTo(start.dx, start.dy);
+          linePath.cubicTo(
+            start.dx,
+            start.dy - 25,
+            (start.dx + end.dx) / 2,
+            (start.dy + end.dy) / 2 - 50,
+            end.dx,
+            end.dy,
+          );
+        }
 
         // PathMetrics pms = linePath.computeMetrics();
 
@@ -277,10 +296,27 @@ class RenderSunGraphWidget extends RenderBox
 
         // print(pms.last.getTangentForOffset(pms.last.length * 0.99));
 
+        ctx.read<EdgeController>().addEdge(Edge(
+              path: linePath,
+              firstNodeIndex: relation.item1,
+              secondNodeIndex: relation.item2,
+            ));
+
         canvas.drawPath(linePath, paint);
       }
     }
     defaultPaint(context, offset);
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultComputeDistanceToHighestActualBaseline(baseline);
+  }
+
+  @override
+  bool hitTestChildren(HitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result as BoxHitTestResult,
+        position: position);
   }
 }
 
@@ -291,12 +327,15 @@ class SunGraphWidget extends MultiChildRenderObjectWidget {
       required this.center,
       required this.height,
       required this.width,
+      required this.currentRelation,
       required this.relations})
       : super(children: children, key: key);
   final double width;
   final double height;
   final Offset center;
   final NodeRelations relations;
+
+  final Tuple2<int, int> currentRelation;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -311,7 +350,7 @@ class SunGraphWidget extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(
       BuildContext context, covariant RenderSunGraphWidget renderObject) {
-    // TODO: implement updateRenderObject
-    super.updateRenderObject(context, renderObject);
+    renderObject.currentRelation = currentRelation;
+    renderObject.ctx = context;
   }
 }

@@ -3,15 +3,16 @@ import 'package:flutter_graph/graph/blur_controller.dart';
 import 'package:provider/provider.dart';
 
 class NodeWidget extends StatelessWidget {
-  NodeWidget({
-    Key? key,
-    this.builder,
-    this.child,
-    this.backgroundColor,
-    required this.index,
-    this.onTap,
-    this.isRoot = false,
-  })  : assert(builder != null || child != null),
+  NodeWidget(
+      {Key? key,
+      this.builder,
+      this.child,
+      this.backgroundColor,
+      required this.index,
+      this.onTap,
+      this.isRoot = false,
+      this.needsBlur = false})
+      : assert(builder != null || child != null),
         super(key: key);
   final Widget? child;
   final Builder? builder;
@@ -19,6 +20,7 @@ class NodeWidget extends StatelessWidget {
   final bool isRoot;
   final int index;
   final VoidCallback? onTap;
+  final bool needsBlur;
 
   @override
   bool operator ==(Object other) {
@@ -32,37 +34,50 @@ class NodeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: backgroundColor ?? Theme.of(context).primaryColor,
-      child: MouseRegion(
-        onExit: (event) {
-          context.read<BlurController>().changeState(false);
-        },
-        onHover: (event) {
-          context.read<BlurController>().changeState(true);
-        },
-        onEnter: (event) {
-          RenderBox renderObject =
-              globalKey.currentContext?.findRenderObject() as RenderBox;
-          Offset off = renderObject.localToGlobal(Offset.zero);
+    if (needsBlur) {
+      return Material(
+        color: backgroundColor ?? Theme.of(context).primaryColor,
+        child: MouseRegion(
+          onExit: (event) {
+            context.read<BlurController>().changeState(false);
+          },
+          onHover: (event) {
+            context.read<BlurController>().changeState(true);
+          },
+          onEnter: (event) {
+            RenderBox renderObject =
+                globalKey.currentContext?.findRenderObject() as RenderBox;
+            Offset off = renderObject.localToGlobal(Offset.zero);
 
-          context.read<BlurController>().changeDetails(
-              off,
-              FakeNodeWidget(
-                onTap: onTap ??
-                    () {
-                      debugPrint(index.toString());
-                    },
-                builder: builder,
-                child: child,
-              ));
-        },
-        child: SizedBox(
-          key: globalKey,
-          child: child ?? builder,
+            context.read<BlurController>().changeDetails(
+                off,
+                FakeNodeWidget(
+                  onTap: onTap ??
+                      () {
+                        debugPrint(index.toString());
+                      },
+                  builder: builder,
+                  child: child,
+                ));
+          },
+          child: SizedBox(
+            key: globalKey,
+            child: child ?? builder,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      return InkWell(
+        onTap: onTap,
+        child: Material(
+          color: backgroundColor ?? Theme.of(context).primaryColor,
+          child: SizedBox(
+            key: globalKey,
+            child: child ?? builder,
+          ),
+        ),
+      );
+    }
   }
 }
 

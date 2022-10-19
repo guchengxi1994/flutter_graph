@@ -30,30 +30,52 @@ class _SunGraphDemoState extends State<SunGraphPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: Colors.amberAccent,
-      body: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: SunGraph(
+    return Row(
+      children: [
+        Container(
+          color: Colors.greenAccent,
+          width: 200,
+        ),
+        Expanded(
+            child: SunGraph(
+          onEdgeSelected: (from, to) {
+            debugPrint(from.toString());
+            debugPrint(to.toString());
+          },
+          needsBlur: true,
           relations: nodeRelations,
           widgetWidth: size.width,
           widgetHeight: size.height,
           nodes: nodesData
-              .map((e) => Container(
-                    // color: Colors.transparent,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 2),
-                        color: Colors.transparent),
+              .map(
+                (e) => NodeWidget(
+                  needsBlur: true,
+                  index: e,
+                  child: Container(
+                    color: Colors.white,
                     padding: const EdgeInsets.all(5),
-                    child: Center(
-                        child: Text(
-                      e.toString(),
-                    )),
-                  ))
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Image.asset("assets/images/file.png"),
+                        ),
+                        Text(
+                          e.toString(),
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
               .toList(),
-        ),
-      ),
+        ))
+      ],
     );
   }
 }

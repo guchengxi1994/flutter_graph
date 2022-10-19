@@ -52,6 +52,8 @@ class _FlowGraphState extends State<FlowGraph> {
     super.dispose();
   }
 
+  final GlobalKey globalKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final relations = NodeData.fromJson(data.toJson()).toRelations();
@@ -59,7 +61,7 @@ class _FlowGraphState extends State<FlowGraph> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => EdgeController(),
+          create: (_) => EdgeController()..init(),
         ),
         ChangeNotifierProvider(
           create: (_) => BlurController(),
@@ -68,7 +70,14 @@ class _FlowGraphState extends State<FlowGraph> {
       builder: (context, child) {
         final edges = context.read<EdgeController>().edges;
         BlurController blurController = context.watch<BlurController>();
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          final RenderBox box =
+              globalKey.currentContext!.findRenderObject() as RenderBox;
+          final topLeftPosition = box.localToGlobal(Offset.zero);
+          context.read<BlurController>().changeGlobalOffset(topLeftPosition);
+        });
         return Blurred(
+          key: globalKey,
           blurValue: blurController.shouldBlur ? 1.5 : 0,
           widget: GestureDetector(
             onTapDown: (details) {

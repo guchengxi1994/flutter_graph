@@ -7,4 +7,8 @@ class EdgeController extends ChangeNotifier {
   addEdge(Edge e) {
     if (!edges.contains(e)) edges.add(e);
   }
+
+  init() {
+    edges.clear();
+  }
 }
