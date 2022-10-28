@@ -3,8 +3,13 @@ class NodeData {
   List<NodeData>? children;
   bool? isRoot;
   int? _depth;
+  int? parentIndex;
 
-  NodeData({this.children, this.index, this.isRoot});
+  NodeData({this.children, this.index, this.isRoot, this.parentIndex}) {
+    if (isRoot == true) {
+      parentIndex = null;
+    }
+  }
 
   @override
   bool operator ==(Object other) {
@@ -29,6 +34,7 @@ class NodeData {
     if (_depth != null) {
       data['depth'] = _depth;
     }
+    data['parentIndex'] = parentIndex;
     return data;
   }
 
@@ -41,6 +47,7 @@ class NodeData {
         children!.add(NodeData.fromJson(v, depth: depth + 1));
       });
     }
+    parentIndex = json['parentIndex'];
     isRoot = json['isRoot'];
   }
 

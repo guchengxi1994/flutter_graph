@@ -94,7 +94,7 @@ class RenderFlowGraphWidget extends RenderBox
       while (child != null) {
         final GraphParentData childParentData =
             child.parentData as GraphParentData;
-        int? depth = nodeDatas
+        int? currentDepth = nodeDatas
             .firstWhere((element) => element.index == curIndex,
                 orElse: () => NodeData(index: -1))
             .depth;
@@ -112,15 +112,17 @@ class RenderFlowGraphWidget extends RenderBox
 
         late Offset position;
 
-        depth = depth ?? 1;
+        if (currentDepth == -1 || currentDepth == null) {
+          currentDepth = 1;
+        }
 
         if (curIndex >= 1) {
-          if (depth > 0) {
-            if (rootData.countPerDepth[depth]! >
-                rootData.countPerDepth[depth - 1]!) {
+          if (currentDepth > 0) {
+            if (rootData.countPerDepth[currentDepth]! >
+                rootData.countPerDepth[currentDepth - 1]!) {
               int _positionIndex = 0;
               while (true) {
-                position = Offset(depth * nodeHorizontalDistance,
+                position = Offset(currentDepth * nodeHorizontalDistance,
                     childSize.height + _positionIndex * nodeVerticalDistance);
 
                 if (!_positions.contains(position)) {
@@ -133,7 +135,7 @@ class RenderFlowGraphWidget extends RenderBox
             } else {
               int _positionIndex = 0;
               while (true) {
-                position = Offset(depth * nodeHorizontalDistance,
+                position = Offset(currentDepth * nodeHorizontalDistance,
                     childSize.height + _positionIndex * nodeVerticalDistance);
 
                 if (!_positions.contains(position)) {
@@ -148,11 +150,11 @@ class RenderFlowGraphWidget extends RenderBox
           }
         } else {
           /// 第一个node
-          if (rootData.countPerDepth[depth]! < maxDepth) {
+          if (rootData.countPerDepth[currentDepth]! < maxDepth) {
             position = Offset(
                 childSize.width,
                 childSize.height +
-                    maxHeight / (rootData.countPerDepth[depth]! + 1));
+                    maxHeight / (rootData.countPerDepth[currentDepth]! + 1));
           } else {
             position = Offset(childSize.width, childSize.height);
           }
@@ -170,7 +172,7 @@ class RenderFlowGraphWidget extends RenderBox
         final GraphParentData childParentData =
             child.parentData as GraphParentData;
 
-        final depth = nodeDatas
+        final currentDepth = nodeDatas
             .firstWhere((element) => element.index == curIndex,
                 orElse: () => NodeData(index: -1))
             .depth;
@@ -191,7 +193,7 @@ class RenderFlowGraphWidget extends RenderBox
         if (curIndex >= 1) {
           int _positionIndex = 0;
           while (1 == 1) {
-            position = Offset((depth ?? 1) * nodeHorizontalDistance,
+            position = Offset((currentDepth ?? 1) * nodeHorizontalDistance,
                 childSize.height + _positionIndex * nodeVerticalDistance);
 
             if (!_positions.contains(position)) {

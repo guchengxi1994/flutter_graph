@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flow_graph_example/tree_graph_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
@@ -45,11 +46,13 @@ class Routers {
   static const pageMain = "/pageMain";
   static const pageGraph = "/pageGraph";
   static const pageSun = "/pageSun";
+  static const pageTree = "/pageTree";
 
   static Map<String, WidgetBuilder> routers = {
     pageMain: (context) => const PushTO(),
     pageGraph: (context) => const FlowGraphPage(),
-    pageSun: (context) => const SunGraphPage()
+    pageSun: (context) => const SunGraphPage(),
+    pageTree: (context) => const TreeGraphDemo()
   };
 }
 
@@ -73,6 +76,11 @@ class PushTO extends StatelessWidget {
                   Navigator.of(context).pushNamed(Routers.pageSun);
                 },
                 child: const Text("sun")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(Routers.pageTree);
+                },
+                child: const Text("tree")),
           ],
         ),
       ),

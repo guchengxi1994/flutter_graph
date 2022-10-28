@@ -78,7 +78,11 @@ class _FlowGraphState extends State<FlowGraph> {
         });
         return Blurred(
           key: globalKey,
-          blurValue: blurController.shouldBlur ? 1.5 : 0,
+
+          /// 为什么设置 0.001
+          /// 因为 flutter web canvas渲染有bug,设置为0会报错
+          /// https://github.com/flutter/flutter/issues/114055
+          blurValue: blurController.shouldBlur ? 1.5 : 0.001,
           widget: GestureDetector(
             onTapDown: (details) {
               Offset position = Offset(

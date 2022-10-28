@@ -79,7 +79,10 @@ class _SunGraphState extends State<SunGraph> {
           });
           return Blurred(
               key: globalKey,
-              blurValue: blurController.shouldBlur ? 1.5 : 0,
+
+              /// 为什么设置 0.001
+              /// 因为 flutter web canvas渲染有bug,设置为0会报错
+              blurValue: blurController.shouldBlur ? 1.5 : 0.001,
               widget: GestureDetector(
                 onTapDown: (details) {
                   Offset position = Offset(
