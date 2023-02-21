@@ -16,7 +16,7 @@ enum FlowGraphDirection { horizonal, vertical }
 class FlowGraph extends StatefulWidget {
   const FlowGraph(
       {Key? key,
-      this.direction = FlowGraphDirection.vertical,
+      this.direction = FlowGraphDirection.horizonal,
       this.centerLayout = true,
       required this.data,
       required this.nodes})
@@ -30,7 +30,7 @@ class FlowGraph extends StatefulWidget {
   State<FlowGraph> createState() => _FlowGraphState();
 }
 
-const double error = 3;
+const int error = 1;
 
 class _FlowGraphState extends State<FlowGraph> {
   Tuple2<int, int> currentRelation = const Tuple2(-1, -1);
@@ -96,19 +96,30 @@ class _FlowGraphState extends State<FlowGraph> {
                   continue;
                 }
 
-                final c = edges[i].path!.contains(position) ||
-                    edges[i]
-                        .path!
-                        .contains(Offset(position.dx, position.dy - error)) ||
-                    edges[i]
-                        .path!
-                        .contains(Offset(position.dx, position.dy + error)) ||
-                    edges[i]
-                        .path!
-                        .contains(Offset(position.dx - error, position.dy)) ||
-                    edges[i]
-                        .path!
-                        .contains(Offset(position.dx + error, position.dy));
+                bool c = false;
+
+                if (widget.direction == FlowGraphDirection.horizonal) {
+                  for (int e = -error; e < error; e++) {
+                    c = c ||
+                        edges[i].path!.contains(Offset(
+                            position.dx, (position.dy + e).ceilToDouble()));
+                    if (c) {
+                      break;
+                    }
+                  }
+                } else {
+                  /// TODO
+                  ///
+                  /// vertical
+                  for (int e = -error; e < error; e++) {
+                    c = c ||
+                        edges[i].path!.contains(Offset(
+                            (position.dx + e).ceilToDouble(), position.dy + e));
+                    if (c) {
+                      break;
+                    }
+                  }
+                }
 
                 if (c) {
                   setState(() {
