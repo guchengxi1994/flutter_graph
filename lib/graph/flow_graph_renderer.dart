@@ -271,12 +271,9 @@ class RenderFlowGraphWidget extends RenderBox
 
         if (firstNodeOffset.dy == secondNodeOffset.dy) {
           linePath.moveTo(firstNodeOffset.dx, firstNodeOffset.dy);
-          linePath.cubicTo(
-            firstNodeOffset.dx,
-            firstNodeOffset.dy,
-            firstNodeOffset.dx + 10,
-            firstNodeOffset.dy + 10,
-            secondNodeOffset.dx - arrowSize,
+
+          linePath.lineTo(
+            secondNodeOffset.dx,
             secondNodeOffset.dy,
           );
 
@@ -289,6 +286,7 @@ class RenderFlowGraphWidget extends RenderBox
           arrowPainter.render();
         } else {
           if (firstNodeOffset.dy < secondNodeOffset.dy) {
+            /// 在第二个node上面
             start = Offset(firstData.right + offset.dx,
                 (firstData.bottom + firstData.top) / 2 + offset.dy);
             end = Offset(secondData.left + offset.dx,
@@ -303,6 +301,7 @@ class RenderFlowGraphWidget extends RenderBox
               end.dy,
             );
           } else {
+            /// 在第二个node下面
             start = Offset(firstData.right + offset.dx,
                 (firstData.bottom + firstData.top) / 2 + offset.dy);
 

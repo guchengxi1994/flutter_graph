@@ -30,6 +30,8 @@ class FlowGraph extends StatefulWidget {
   State<FlowGraph> createState() => _FlowGraphState();
 }
 
+const double error = 3;
+
 class _FlowGraphState extends State<FlowGraph> {
   Tuple2<int, int> currentRelation = const Tuple2(-1, -1);
   final ScrollController controller1 = ScrollController();
@@ -97,16 +99,16 @@ class _FlowGraphState extends State<FlowGraph> {
                 final c = edges[i].path!.contains(position) ||
                     edges[i]
                         .path!
-                        .contains(Offset(position.dx, position.dy - 1)) ||
+                        .contains(Offset(position.dx, position.dy - error)) ||
                     edges[i]
                         .path!
-                        .contains(Offset(position.dx, position.dy + 1)) ||
+                        .contains(Offset(position.dx, position.dy + error)) ||
                     edges[i]
                         .path!
-                        .contains(Offset(position.dx - 1, position.dy)) ||
+                        .contains(Offset(position.dx - error, position.dy)) ||
                     edges[i]
                         .path!
-                        .contains(Offset(position.dx + 1, position.dy));
+                        .contains(Offset(position.dx + error, position.dy));
 
                 if (c) {
                   setState(() {
