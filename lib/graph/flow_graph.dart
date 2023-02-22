@@ -30,8 +30,6 @@ class FlowGraph extends StatefulWidget {
   State<FlowGraph> createState() => _FlowGraphState();
 }
 
-const int error = 1;
-
 class _FlowGraphState extends State<FlowGraph> {
   Tuple2<int, int> currentRelation = const Tuple2(-1, -1);
   final ScrollController controller1 = ScrollController();
@@ -96,30 +94,8 @@ class _FlowGraphState extends State<FlowGraph> {
                   continue;
                 }
 
-                bool c = false;
-
-                if (widget.direction == FlowGraphDirection.horizonal) {
-                  for (int e = -error; e < error; e++) {
-                    c = c ||
-                        edges[i].path!.contains(Offset(
-                            position.dx, (position.dy + e).ceilToDouble()));
-                    if (c) {
-                      break;
-                    }
-                  }
-                } else {
-                  /// TODO
-                  ///
-                  /// vertical
-                  for (int e = -error; e < error; e++) {
-                    c = c ||
-                        edges[i].path!.contains(Offset(
-                            (position.dx + e).ceilToDouble(), position.dy + e));
-                    if (c) {
-                      break;
-                    }
-                  }
-                }
+                bool c = edges[i].path!.contains(Offset(
+                    position.dx.ceilToDouble(), position.dy.ceilToDouble()));
 
                 if (c) {
                   setState(() {

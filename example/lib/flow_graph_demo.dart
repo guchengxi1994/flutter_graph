@@ -85,49 +85,52 @@ class _HomePageState extends State<FlowGraphPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FlowGraph(
-      data: data,
-      nodes: nodesData
-          .map((e) => NodeWidget(
-                onTap: () {
-                  SmartDialog.show(builder: (context) {
-                    return Container(
-                      height: 80,
-                      width: 180,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(e.name!,
-                          style: const TextStyle(color: Colors.white)),
-                    );
-                  });
-                },
-                isRoot: e.index == 0,
-                index: e.index!,
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  color: Colors.white,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: Image.asset(e.url!),
-                      ),
-                      Text(
-                        e.name.toString(),
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    ],
+    return Scaffold(
+      appBar: AppBar(),
+      body: FlowGraph(
+        data: data,
+        nodes: nodesData
+            .map((e) => NodeWidget(
+                  onTap: () {
+                    SmartDialog.show(builder: (context) {
+                      return Container(
+                        height: 80,
+                        width: 180,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(e.name!,
+                            style: const TextStyle(color: Colors.white)),
+                      );
+                    });
+                  },
+                  isRoot: e.index == 0,
+                  index: e.index!,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    color: Colors.white,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Image.asset(e.url!),
+                        ),
+                        Text(
+                          e.name.toString(),
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ))
-          .toList(),
+                ))
+            .toList(),
+      ),
     );
   }
 }
