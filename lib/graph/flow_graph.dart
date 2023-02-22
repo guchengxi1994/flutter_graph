@@ -11,8 +11,6 @@ import 'flow_graph_renderer.dart';
 import 'node_data.dart';
 import 'node_relations.dart';
 
-enum FlowGraphDirection { horizonal, vertical }
-
 class FlowGraph extends StatefulWidget {
   const FlowGraph(
       {Key? key,
@@ -114,12 +112,14 @@ class _FlowGraphState extends State<FlowGraph> {
                   for (int e = -error; e < error; e++) {
                     c = c ||
                         edges[i].path!.contains(Offset(
-                            (position.dx + e).ceilToDouble(), position.dy + e));
+                            (position.dx + e).ceilToDouble(), position.dy));
                     if (c) {
                       break;
                     }
                   }
                 }
+
+                // print(c);
 
                 if (c) {
                   setState(() {
@@ -149,6 +149,7 @@ class _FlowGraphState extends State<FlowGraph> {
                     child: SingleChildScrollView(
                       controller: controller2,
                       child: FlowGraphWidget(
+                          direction: widget.direction,
                           nodeHorizontalDistance: 250,
                           nodeVerticalDistance: 200,
                           rootData: data,
