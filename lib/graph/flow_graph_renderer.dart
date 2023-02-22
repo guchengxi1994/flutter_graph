@@ -343,7 +343,12 @@ class RenderFlowGraphWidget extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    ctx.read<EdgeController>().init();
+    // print(ctx.read<EdgeController>().edges.length);
+    // if (ctx.read<EdgeController>().edges.isNotEmpty) {
+    //   print(ctx.read<EdgeController>().edges.first.path);
+    // }
+
+    // ctx.read<EdgeController>().init();
     var canvas = context.canvas;
     canvas.save();
 
@@ -560,6 +565,8 @@ class RenderFlowGraphWidget extends RenderBox
                 firstNodeIndex: relation.item1,
                 secondNodeIndex: relation.item2,
               ));
+
+          // print("===> $linePath");
 
           canvas.drawPath(linePath, paint);
         }

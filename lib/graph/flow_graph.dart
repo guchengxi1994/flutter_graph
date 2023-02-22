@@ -2,6 +2,7 @@
 
 import 'package:blurred/blurred.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_graph/graph/edge.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -12,13 +13,13 @@ import 'node_data.dart';
 import 'node_relations.dart';
 
 class FlowGraph extends StatefulWidget {
-  const FlowGraph(
-      {Key? key,
-      this.direction = FlowGraphDirection.horizonal,
-      this.centerLayout = true,
-      required this.data,
-      required this.nodes})
-      : super(key: key);
+  const FlowGraph({
+    Key? key,
+    this.direction = FlowGraphDirection.horizonal,
+    this.centerLayout = true,
+    required this.data,
+    required this.nodes,
+  }) : super(key: key);
   final FlowGraphDirection direction;
   final bool centerLayout;
   final NodeData data;
@@ -68,7 +69,7 @@ class _FlowGraphState extends State<FlowGraph> {
         ),
       ],
       builder: (context, child) {
-        final edges = context.read<EdgeController>().edges;
+        late final List<Edge> edges = context.read<EdgeController>().edges;
         BlurController blurController = context.watch<BlurController>();
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           final RenderBox box =
