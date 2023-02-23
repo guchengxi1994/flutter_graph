@@ -4,7 +4,8 @@ import 'package:flow_graph_example/tree_graph_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-import 'flow_graph_demo.dart';
+import 'flow_graph_demo.dart' show FlowGraphPage;
+import 'vertical_flow_graph_demo.dart' show VerticalFlowGraphPage;
 import 'sun_graph_demo.dart';
 
 void main() {
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
 class Routers {
   static const pageMain = "/pageMain";
   static const pageGraph = "/pageGraph";
+  static const pageVGraph = "/pageVGraph";
   static const pageSun = "/pageSun";
   static const pageTree = "/pageTree";
 
@@ -53,7 +55,8 @@ class Routers {
     pageMain: (context) => const PushTO(),
     pageGraph: (context) => const FlowGraphPage(),
     pageSun: (context) => const SunGraphPage(),
-    pageTree: (context) => const TreeGraphDemo()
+    pageTree: (context) => const TreeGraphDemo(),
+    pageVGraph: (context) => const VerticalFlowGraphPage()
   };
 }
 
@@ -72,6 +75,11 @@ class PushTO extends StatelessWidget {
                   Navigator.of(context).pushNamed(Routers.pageGraph);
                 },
                 child: const Text("flow")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(Routers.pageVGraph);
+                },
+                child: const Text("Vertical flow")),
             ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushNamed(Routers.pageSun);

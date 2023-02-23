@@ -3,11 +3,11 @@ import 'package:flutter_graph/flutter_graph.dart';
 import 'package:flutter_graph/graph/flow_graph_renderer.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-class FlowGraphPage extends StatefulWidget {
-  const FlowGraphPage({Key? key}) : super(key: key);
+class VerticalFlowGraphPage extends StatefulWidget {
+  const VerticalFlowGraphPage({Key? key}) : super(key: key);
 
   @override
-  State<FlowGraphPage> createState() => _HomePageState();
+  State<VerticalFlowGraphPage> createState() => _HomePageState();
 }
 
 class DemoNodeWidgetData {
@@ -32,7 +32,7 @@ class DemoNodeWidgetData {
   }
 }
 
-class _HomePageState extends State<FlowGraphPage> {
+class _HomePageState extends State<VerticalFlowGraphPage> {
   final names = ["壹零", "工程师", "文件A"];
   final urls = ["assets/images/file.png", "assets/images/user.png"];
   NodeData data = NodeData();
@@ -89,7 +89,7 @@ class _HomePageState extends State<FlowGraphPage> {
     return Scaffold(
       appBar: AppBar(),
       body: FlowGraph(
-        direction: FlowGraphDirection.horizonal,
+        direction: FlowGraphDirection.vertical,
         data: data,
         nodes: nodesData
             .map((e) => NodeWidget(
@@ -111,7 +111,8 @@ class _HomePageState extends State<FlowGraphPage> {
                   isRoot: e.index == 0,
                   index: e.index!,
                   child: Container(
-                    padding: const EdgeInsets.all(5),
+                    // padding: const EdgeInsets.all(5),
+                    width: 70,
                     color: Colors.white,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +124,7 @@ class _HomePageState extends State<FlowGraphPage> {
                           /// width = 60的时候正常
                           ///
                           /// width = 40不正常
-                          width: 60,
+                          width: 40,
                           height: 40,
                           child: Image.asset(e.url!),
                         ),

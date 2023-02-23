@@ -276,6 +276,8 @@ class RenderFlowGraphWidget extends RenderBox
                       currentDepth * nodeVerticalDistance);
 
                   if (!_positions.contains(position)) {
+                    // print(
+                    //     "(${childSize.width} + ${_positionIndex} * ${nodeHorizontalDistance},${currentDepth}*${nodeVerticalDistance})");
                     _positions.add(position);
                     break;
                   } else {
